@@ -1,0 +1,177 @@
+/* Tailwind source. Build with `npm run build:css` -> assets/css/site.css (no CDN, no runtime). */
+@import "tailwindcss";
+
+@source "../*.html";
+@source "../assets/js/*.js";
+
+/* Self-hosted fonts (SIL Open Font License, via @fontsource). No requests to Google Fonts. */
+@font-face { font-family: "Syne"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/syne-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Syne"; font-style: normal; font-weight: 800; font-display: swap; src: url("../fonts/syne-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+
+@theme {
+  --font-display: "Syne", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* Contrast notes (on ink-950): text 17.9:1, mist 8.6:1, volt 7.7:1, lime 15:1 */
+  --color-ink-950: #0a0b0d;
+  --color-ink-900: #111317;
+  --color-ink-850: #15181d;
+  --color-ink-800: #1b1f26;
+  --color-ink-700: #2a2f38;
+  --color-ink-600: #3a414d;
+  --color-text: #f3f5f8;
+  --color-mist: #a9b2c0;
+  --color-volt: #4aa8ff;
+  --color-volt-deep: #1f7fe0;
+  --color-lime: #c6ff4d;
+  --color-warn: #ffb4a8;
+
+  --radius-xl2: 1.25rem;
+  --radius-xl3: 1.75rem;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; scroll-padding-top: 6rem; -webkit-text-size-adjust: 100%; }
+  body { @apply bg-ink-950 text-text font-sans antialiased; font-size: 1.0625rem; line-height: 1.65; }
+  ::selection { background: var(--color-volt); color: #041222; }
+  h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  img { max-width: 100%; height: auto; }
+
+  /* One strong, consistent focus indicator for every interactive element (WCAG 2.4.7 / 2.4.13). */
+  :focus { outline: none; }
+  :focus-visible { outline: 3px solid var(--color-lime); outline-offset: 3px; border-radius: 0.5rem; }
+
+  a { text-underline-offset: 0.2em; }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+  .skip-link {
+    @apply fixed left-4 top-3 z-[100] -translate-y-24 rounded-lg bg-lime px-4 py-3 font-semibold text-ink-950 transition-transform;
+  }
+  .skip-link:focus { @apply translate-y-0; }
+
+  .eyebrow { @apply inline-flex items-center gap-3 font-mono text-sm uppercase tracking-[0.16em] text-volt; }
+  .eyebrow::before { content: ""; @apply h-px w-8 bg-volt; }
+
+  .h-section { @apply mt-4 text-4xl font-extrabold sm:text-5xl lg:text-6xl; }
+  .lede { @apply mt-5 max-w-2xl text-lg text-mist; }
+
+  .btn {
+    @apply relative inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full px-6 py-3 text-base font-semibold transition-[background-color,box-shadow,transform,color] duration-200 ease-out;
+    will-change: transform;
+  }
+  .btn svg { @apply size-5 shrink-0; }
+  .btn-primary { @apply bg-volt text-ink-950 shadow-[0_10px_40px_-10px_rgba(74,168,255,.7)]; }
+  .btn-primary:hover { @apply bg-[#6bb8ff] shadow-[0_14px_50px_-8px_rgba(74,168,255,.85)]; }
+  .btn-ghost { @apply border border-ink-600 bg-white/[0.03] text-text; }
+  .btn-ghost:hover { @apply border-volt bg-volt/10; }
+  .btn-sm { @apply min-h-11 px-4 py-2 text-[0.9375rem]; }
+
+  .card { @apply rounded-xl3 border border-white/[0.08] bg-ink-900/80; }
+  .chip { @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-mist; }
+
+  /* Radio "chips" — real inputs, styled labels */
+  .opt { @apply relative block h-full; }
+  .opt input { @apply absolute inset-0 m-0 cursor-pointer opacity-0; }
+  .opt span {
+    @apply flex h-full min-h-12 items-center gap-2 rounded-xl border border-ink-600 bg-ink-850 px-3.5 py-2.5 text-[0.9375rem] font-medium text-text transition-colors;
+  }
+  .opt input:hover + span { @apply border-mist; }
+  .opt input:checked + span { @apply border-volt bg-volt/15 text-white; box-shadow: inset 0 0 0 1px var(--color-volt); }
+  .opt input:checked + span::before { content: "✓"; @apply font-bold text-volt; }
+  .opt input:focus-visible + span { outline: 3px solid var(--color-lime); outline-offset: 3px; }
+
+  /* Form fields */
+  .field label { @apply mb-2 block text-[0.9375rem] font-semibold text-text; }
+  .field .hint { @apply mb-2 block text-sm text-mist; }
+  .input {
+    @apply block w-full rounded-xl border border-ink-600 bg-ink-850 px-4 py-3 text-base text-text placeholder:text-[#8791a0] transition-colors;
+  }
+  .input:hover { @apply border-mist; }
+  .input:focus-visible { @apply border-volt; outline-offset: 2px; }
+  .input[aria-invalid="true"] { @apply border-warn; }
+  .field-error { @apply mt-2 flex items-start gap-2 text-[0.9375rem] font-medium text-warn; }
+  .field-error::before { content: "⚠"; }
+  .field-error:empty { display: none; }
+
+  .prose-legal { @apply max-w-3xl text-mist; }
+  .prose-legal h2 { @apply mt-14 text-2xl font-extrabold text-text sm:text-3xl; }
+  .prose-legal h3 { @apply mt-8 font-sans text-lg font-semibold tracking-normal text-text; }
+  .prose-legal p, .prose-legal ul, .prose-legal ol { @apply mt-4; }
+  .prose-legal ul { @apply list-disc space-y-2 pl-6; }
+  .prose-legal ol { @apply list-decimal space-y-2 pl-6; }
+  .prose-legal strong { @apply text-text; }
+  .prose-legal a { @apply font-medium text-volt underline; }
+  .prose-legal a:hover { @apply text-white; }
+  .callout { @apply mt-6 rounded-xl2 border border-volt/30 bg-volt/[0.07] p-5 text-text; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .grad-text { background: linear-gradient(95deg, #fff 10%, var(--color-volt) 60%, var(--color-lime)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+}
+
+/* ---------- Hero / story ---------- */
+.story-stage::after { /* keeps copy legible over the car */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 70% 45%, transparent 35%, rgba(10,11,13,.65) 80%),
+    linear-gradient(180deg, rgba(10,11,13,.6) 0%, transparent 18%, transparent 72%, var(--color-ink-950) 100%);
+}
+@media (min-width: 1024px) {
+  .story-stage::after { background: linear-gradient(90deg, rgba(10,11,13,.95) 0%, rgba(10,11,13,.85) 36%, rgba(10,11,13,.4) 50%, transparent 62%), linear-gradient(180deg, transparent 75%, var(--color-ink-950)); }
+}
+.stage-glow { background: radial-gradient(60% 45% at 65% 62%, rgba(74,168,255,.16), transparent 70%), radial-gradient(40% 30% at 30% 20%, rgba(198,255,77,.05), transparent 70%); }
+#story-canvas, #estimator-canvas { opacity: 0; transition: opacity 1.2s ease; }
+.has-3d #story-canvas, .has-3d #estimator-canvas { opacity: 1; }
+.only-3d { display: none !important; }
+.has-3d .only-3d { display: revert !important; }
+.has-3d .only-3d.flex { display: flex !important; }
+.fallback-3d { display: none; }
+.no-3d .fallback-3d { display: block; }
+.has-3d .loading-3d, .no-3d .loading-3d { display: none; }
+
+/* Soft scan-line shimmer while the model streams in */
+.loading-3d::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(74,168,255,.08) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 2.4s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ---------- Before / after ---------- */
+.ba { --pos: 50%; }
+.ba .after { clip-path: inset(0 0 0 var(--pos)); }
+.ba .handle { left: var(--pos); }
+.ba input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; }
+.ba input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 48px; height: 100vh; background: transparent; cursor: ew-resize; }
+.ba input[type="range"]::-moz-range-thumb { width: 48px; height: 100%; border: 0; background: transparent; cursor: ew-resize; }
+.ba:has(input:focus-visible) { outline: 3px solid var(--color-lime); outline-offset: 4px; }
+
+/* ---------- Reveal on scroll (only when JS runs and motion is OK) ---------- */
+.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* Mobile menu (toggled by site.js) */
+.nav-panel.is-open { display: block; }
+
+/* Dialog */
+dialog.lightbox::backdrop { background: rgba(5,6,8,.88); backdrop-filter: blur(6px); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}
+
+@media (forced-colors: active) {
+  .btn, .opt span, .card, .input { border: 1px solid CanvasText; }
+  .grad-text { color: CanvasText; background: none; }
+}
+
+/* Very narrow screens / large zoom: the wide display face must still reflow (WCAG 1.4.10). */
+@media (max-width: 399px) {
+  h1, h2, h3 { hyphens: auto; overflow-wrap: anywhere; }
+}

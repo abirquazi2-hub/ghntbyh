@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en-CA" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility | Art's Autobody &amp; Collision Centre</title>
+<meta name="description" content="How we make the Art's Autobody &amp; Collision Centre website accessible, and how to give feedback.">
+<meta name="theme-color" content="#0a0b0d">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="border-b border-white/[0.06]">
+  <div class="wrap flex min-h-18 flex-wrap items-center gap-4 py-3">
+    <a href="index.html" class="mr-auto rounded-lg font-display text-lg font-extrabold">Art's Autobody<span class="sr-only"> &amp; Collision Centre, home page</span></a>
+    <a class="btn btn-ghost btn-sm" href="index.html">Back to home</a>
+    <a class="btn btn-primary btn-sm" href="tel:+16132372102">Call 613-237-2102</a>
+  </div>
+</header>
+
+<main id="main" tabindex="-1" class="wrap py-16 sm:py-24">
+  <nav aria-label="Breadcrumb" class="text-[0.9375rem] text-mist"><ol class="flex gap-2"><li><a class="underline hover:text-text" href="index.html">Home</a> <span aria-hidden="true">/</span></li><li aria-current="page">Accessibility</li></ol></nav>
+  <h1 class="mt-6 text-4xl font-extrabold sm:text-6xl">Accessibility</h1>
+  <p class="mt-4 text-mist">Last updated: September 27, 2026</p>
+
+  <div class="prose-legal">
+    <p class="callout">We want everyone to be able to use our website and get in touch with us. If anything on the site gets in your way, please <a href="#feedback">tell us</a>. We're also happy to help by phone or in person.</p>
+
+    <h2 id="goal">Our goal</h2>
+    <p>We aim to meet the <a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines (WCAG) 2.2</a> at Level AA wherever practical. This is a goal we work toward. We haven't had the site formally audited, so we don't claim full conformance.</p>
+
+    <h2 id="features">What we've done</h2>
+    <ul>
+      <li>The site can be used with a keyboard alone, with a "Skip to main content" link and a clearly visible focus outline.</li>
+      <li>Pages use headings, landmarks and lists so they make sense with a screen reader.</li>
+      <li>Text and controls are designed to meet WCAG colour-contrast requirements, and text can be enlarged with browser zoom.</li>
+      <li>Meaningful photos have text descriptions. Decorative images are hidden from screen readers.</li>
+      <li>Form fields have visible labels. Error messages explain what to fix and are announced to screen readers.</li>
+      <li>Nothing is shown only on mouse hover.</li>
+      <li>If your device is set to reduce motion, animations are turned off and the 3D camera moves without animated transitions.</li>
+      <li>The before-and-after photo comparisons use standard sliders that work with arrow keys.</li>
+    </ul>
+
+    <h2 id="3d">The 3D car and the damage estimator</h2>
+    <p>The interactive 3D car is a visual feature. Everything it does is also available without it: in the damage estimator, you can choose the damaged area from a list of buttons instead of clicking on the car, and the 3D view can be rotated with buttons instead of dragging. If your device can't display 3D graphics, the list works on its own.</p>
+
+    <h2 id="limits">Known limitations</h2>
+    <ul>
+      <li>The 3D car itself can't be explored with a screen reader. The list-based estimator gives the same information.</li>
+      <li>Links to Google Maps open Google's website, which we don't control.</li>
+      <li>Reviews are shown exactly as customers wrote them on Google, including their original spelling and punctuation.</li>
+    </ul>
+
+    <h2 id="feedback">Feedback and other formats</h2>
+    <p>If you have trouble using any part of this website, or you'd like information in another format, contact us and we'll do our best to help:</p>
+    <ul>
+      <li>Phone: <a href="tel:+16132372102">613-237-2102</a></li>
+      <li>Email: <a href="mailto:yasir@artsautobody.ca">yasir@artsautobody.ca</a></li>
+      <li>In person: 2407 A Kaladar Ave, Ottawa, ON K1V 8B9</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer class="border-t border-white/[0.06] py-10">
+  <div class="wrap flex flex-wrap items-center justify-between gap-6 text-[0.9375rem] text-mist">
+    <p>© <span data-year>2026</span> Art's Autobody &amp; Collision Centre</p>
+    <nav aria-label="Legal"><ul class="flex flex-wrap gap-x-6 gap-y-2">
+      <li><a class="hover:text-text" href="privacy.html">Privacy Policy</a></li>
+      <li><a class="hover:text-text" href="cookies.html">Cookie Policy</a></li>
+      <li><a class="hover:text-text" href="terms.html">Terms of Use</a></li>
+      <li><a class="hover:text-text" href="accessibility.html" aria-current="page">Accessibility</a></li>
+    </ul></nav>
+  </div>
+</footer>
+</body>
+</html>
