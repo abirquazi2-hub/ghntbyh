@@ -259,6 +259,7 @@ export function initShowroom(gltf, canvas, calloutEls = []) {
     if (n.startsWith('Paint 1')) { body = body || o.material.clone(); o.material = body; }
     else if (n.startsWith('Paint 2')) { accent = accent || o.material.clone(); o.material = accent; }
   });
+  if (body) { body.normalScale?.set(0.18, 0.18); body.clearcoat = 1; body.clearcoatRoughness = 0.03; }
   if (accent) { accent.color.set(0x0d0e11); accent.metalness = 0.4; accent.roughness = 0.35; }
   const target = { color: new THREE.Color(), flood: new THREE.Color(), metal: 0.5, rough: 0.3, irid: 0 };
   const floodNow = new THREE.Color(0xff2d55);
@@ -310,22 +311,25 @@ export function initShowroom(gltf, canvas, calloutEls = []) {
     }
   }
 
+  let last = performance.now();
   function tick(now) {
     requestAnimationFrame(tick);
-    if (!stage.visible || document.hidden || canvas.dataset.paused === '1') return;
-    const still = reduceMotion.matches;
-    shown = still ? progress : shown + (progress - shown) * 0.12;
+    if (!stage.visible || document.hidden || canvas.dataset.paused === '1') { last = now; return; }
+    const still = reduceMotion.matches, dt = Math.min((now - last) / 1000, 0.1); last = now;
+    shown = still ? progress : shown + (progress - shown) * (1 - Math.exp(-dt * 7));
+    const wideNow = innerWidth >= 1024, ox = wideNow ? 0.12 + 0.1 * Math.min(1, shown * 6) * (1 - Math.max(0, (shown - 0.9) * 10)) : 0;
+    if (Math.abs(ox - stage.offset[0]) > 0.001) { stage.offset = [ox, wideNow ? 0.02 : -0.12]; stage.resize(); }
     const k = sample(shown);
     explodeNow = k.e; applyExplode(explodeNow);
 
     // Turntable on the hero; once the story starts, settle back to the nearest full turn.
-    if (shown < 0.005 && !still) spin += 0.14;
-    else spin += (Math.round(spin / 360) * 360 - spin) * 0.06;
+    if (shown < 0.005 && !still) spin += 8 * dt;
+    else spin += (Math.round(spin / 360) * 360 - spin) * (1 - Math.exp(-dt * 3));
     poseToCamera(stage.camera, { az: k.az + spin, pol: k.pol, dist: k.dist, target: centre });
 
     // Paint + flood colour easing
     if (body) {
-      const r = still ? 1 : 0.07;
+      const r = still ? 1 : 1 - Math.exp(-dt * 4);
       body.color.lerp(target.color, r);
       body.metalness += (target.metal - body.metalness) * r;
       body.roughness += (target.rough - body.roughness) * r;

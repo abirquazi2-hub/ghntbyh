@@ -109,7 +109,7 @@
   .prose-legal strong { @apply text-text; }
   .prose-legal a { @apply font-medium text-volt underline; }
   .prose-legal a:hover { @apply text-white; }
-  .callout { @apply mt-6 rounded-xl2 border border-volt/30 bg-volt/[0.07] p-5 text-text; }
+  .tag3d { @apply mt-6 rounded-xl2 border border-volt/30 bg-volt/[0.07] p-5 text-text; }
 }
 
 @layer utilities {
@@ -182,7 +182,7 @@ body { background: var(--color-ink-950); }
 .has-3d #stage-canvas { opacity: 1; }
 
 /* Everything after the story sits on solid ground above the stage */
-main > section:not(#hero):not(#anatomy), main > dialog, .wordmark, footer { position: relative; z-index: 10; background-color: var(--color-ink-950); }
+main section:not(#hero):not(#anatomy), .wordmark, footer { position: relative; z-index: 10; background-color: var(--color-ink-950); }
 #hero, #anatomy { position: relative; z-index: 2; }
 
 /* Header floats over the hero */
@@ -192,7 +192,9 @@ main > section:not(#hero):not(#anatomy), main > dialog, .wordmark, footer { posi
 /* Hero */
 .hero-giant { position: absolute; inset: 0; z-index: 0; display: grid; place-items: center; pointer-events: none; overflow: hidden; }
 .hero-giant span { display: block; white-space: nowrap; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: -.05em; line-height: .8;
-  font-size: clamp(5rem, 21vw, 22rem); color: transparent; -webkit-text-stroke: 1.5px color-mix(in oklab, var(--flood) 70%, white); opacity: .5; transform: translateY(-14%); transition: -webkit-text-stroke-color .9s; }
+  font-size: clamp(5rem, 21vw, 22rem); color: transparent; -webkit-text-stroke: 1.5px color-mix(in oklab, var(--flood) 70%, white); opacity: .32; transform: translateY(-24%); transition: -webkit-text-stroke-color .9s; }
+.hero-title { font-size: clamp(2.5rem, 5.4vw, 5rem); line-height: .95; }
+.hero-title .mask { white-space: nowrap; }
 .mask { display: block; overflow: hidden; padding-bottom: .06em; }
 .hero-rise { display: inline-block; }
 .grad-flood { background: linear-gradient(95deg, #fff 5%, color-mix(in oklab, var(--flood) 55%, white) 55%, color-mix(in oklab, var(--flood) 80%, white)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -217,20 +219,22 @@ main > section:not(#hero):not(#anatomy), main > dialog, .wordmark, footer { posi
 
 /* Anatomy */
 .callouts { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
-.callout { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: .6rem; opacity: 0; transition: opacity .45s ease; will-change: transform; }
-.callout.is-on { opacity: 1; }
-.callout i { width: .85rem; height: .85rem; margin: -.425rem 0 0 -.425rem; border-radius: 999px; background: #fff; box-shadow: 0 0 0 4px color-mix(in oklab, var(--flood) 45%, transparent), 0 0 24px var(--flood); flex: none; }
-.callout span { padding: .4rem .75rem; border-radius: .6rem; background: rgba(10,11,13,.85); border: 1px solid rgba(255,255,255,.18); font-size: .9375rem; font-weight: 600; white-space: nowrap; }
-.callout span::before { content: ""; display: inline-block; width: 1.25rem; height: 1px; margin-right: .6rem; vertical-align: middle; background: rgba(255,255,255,.5); }
-.anatomy-steps li { border-radius: 1rem; border: 1px solid rgba(255,255,255,.08); background: rgba(10,11,13,.78); padding: 1rem 1.1rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: border-color .4s, background-color .4s, opacity .4s; }
+.tag3d { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: .6rem; opacity: 0; transition: opacity .45s ease; will-change: transform; }
+.tag3d.is-on { opacity: 1; }
+.tag3d i { width: .85rem; height: .85rem; margin: -.425rem 0 0 -.425rem; border-radius: 999px; background: #fff; box-shadow: 0 0 0 4px color-mix(in oklab, var(--flood) 45%, transparent), 0 0 24px var(--flood); flex: none; }
+.tag3d span { padding: .4rem .75rem; border-radius: .6rem; background: rgba(10,11,13,.85); border: 1px solid rgba(255,255,255,.18); font-size: .9375rem; font-weight: 600; white-space: nowrap; }
+.tag3d span::before { content: ""; display: inline-block; width: 1.25rem; height: 1px; margin-right: .6rem; vertical-align: middle; background: rgba(255,255,255,.5); }
+.anatomy-steps { display: grid; gap: .6rem; max-width: 26rem; }
+.anatomy-steps li { border-radius: 1rem; border: 1px solid rgba(255,255,255,.08); background: rgba(10,11,13,.8); padding: .85rem 1.1rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: border-color .4s, background-color .4s, opacity .4s; }
 .anatomy-steps .num { font-family: var(--font-mono); font-size: .875rem; color: var(--color-mist); }
-.anatomy-steps h3 { margin-top: .25rem; font-size: 1.25rem; font-weight: 800; }
+.anatomy-steps h3 { margin-top: .15rem; font-size: 1.25rem; font-weight: 800; }
 .anatomy-steps li > p:last-child { margin-top: .35rem; font-size: .9375rem; color: var(--color-mist); }
-.js .anatomy-steps li:not(.is-active) { opacity: .55; }
-.anatomy-steps li.is-active { border-color: color-mix(in oklab, var(--flood) 70%, white); background: rgba(10,11,13,.9); }
+.js .anatomy-steps li:not(.is-active) { opacity: .6; }
+.js .anatomy-steps li:not(.is-active) > p:last-child { display: none; }
+.anatomy-steps li.is-active { border-color: color-mix(in oklab, var(--flood) 70%, white); background: rgba(10,11,13,.92); }
 @media (max-width: 1023px) {
   .js .anatomy-steps li:not(.is-active) { display: none; }
-  .callout span { font-size: .875rem; }
+  .tag3d span { font-size: .875rem; }
 }
 
 /* Kinetic type */

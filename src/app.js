@@ -157,9 +157,13 @@ function initServiceHover() {
   const img = $('img', float);
   const xTo = gsap.quickTo(float, 'x', { duration: 0.5, ease: 'power3' }), yTo = gsap.quickTo(float, 'y', { duration: 0.5, ease: 'power3' });
   $$('#services [data-img]').forEach(row => {
-    row.addEventListener('pointerenter', () => { img.src = row.dataset.img; gsap.to(float, { opacity: 1, scale: 1, duration: 0.35 }); });
     row.addEventListener('pointerleave', () => gsap.to(float, { opacity: 0, scale: 0.9, duration: 0.3 }));
-    row.addEventListener('pointermove', e => { xTo(e.clientX - 160); yTo(e.clientY - 110); });
+    row.addEventListener('pointermove', e => {
+      if (img.getAttribute('src') !== row.dataset.img) img.src = row.dataset.img;
+      if (+gsap.getProperty(float, 'opacity') === 0) { gsap.set(float, { x: e.clientX - 160, y: e.clientY - 110 }); }
+      gsap.to(float, { opacity: 1, scale: 1, duration: 0.35, overwrite: 'auto' });
+      xTo(e.clientX - 160); yTo(e.clientY - 110);
+    });
   });
 }
 
