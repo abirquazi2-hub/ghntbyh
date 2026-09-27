@@ -6,7 +6,6 @@
  *   window  -> 'car:ready'              3D is up (site.js reveals 3D-only controls)
  *   window  -> 'car:zone-picked' {zone} user clicked a panel on the estimator car
  *   window  <- 'car:focus-zone'  {zone} site.js asks the estimator car to show a zone
- *   window  <- 'car:paint'       {variant} story paint swatches
  *   window  <- 'car:rotate'      {dir}   estimator rotate buttons (-1, 1, 0 = reset)
  */
 import * as THREE from 'three';
@@ -118,7 +117,7 @@ function makeMarker() {
 }
 
 /* ---------- stage (one renderer + scene) ---------- */
-function createStage(canvas) {
+function createStage(canvas, { floor: withFloor = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, coarse ? 1.5 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -135,20 +134,23 @@ function createStage(canvas) {
   const rim = new THREE.DirectionalLight(0x6fb6ff, 2.2); rim.position.set(-5, 2.5, -4); scene.add(rim);
 
   // Studio floor: soft dark disc, contact shadow and a thin accent ring.
-  const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 64), new THREE.MeshBasicMaterial({
-    map: radialTexture([[0, 'rgba(30,34,42,1)'], [0.45, 'rgba(16,18,23,.9)'], [1, 'rgba(10,11,13,0)']]), transparent: true, depthWrite: false }));
-  floor.rotation.x = -Math.PI / 2; scene.add(floor);
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 5.6), new THREE.MeshBasicMaterial({
     map: radialTexture([[0, 'rgba(0,0,0,.85)'], [0.55, 'rgba(0,0,0,.45)'], [1, 'rgba(0,0,0,0)']]), transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.002; scene.add(shadow);
-  const ring = new THREE.Mesh(new THREE.RingGeometry(3.35, 3.37, 128), new THREE.MeshBasicMaterial({ color: 0x4aa8ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
-  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.003; scene.add(ring);
+  let ring = null;
+  if (withFloor) {
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 64), new THREE.MeshBasicMaterial({
+      map: radialTexture([[0, 'rgba(30,34,42,1)'], [0.45, 'rgba(16,18,23,.9)'], [1, 'rgba(10,11,13,0)']]), transparent: true, depthWrite: false }));
+    floor.rotation.x = -Math.PI / 2; scene.add(floor);
+    ring = new THREE.Mesh(new THREE.RingGeometry(3.35, 3.37, 128), new THREE.MeshBasicMaterial({ color: 0x4aa8ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.003; scene.add(ring);
+  }
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 60);
   const pivot = new THREE.Group(); scene.add(pivot);
   const marker = makeMarker(); scene.add(marker);
 
-  const stage = { renderer, scene, camera, pivot, marker, canvas, car: null, frame: null, visible: true, offset: [0, 0] };
+  const stage = { renderer, scene, camera, pivot, marker, canvas, rim, key, car: null, frame: null, visible: true, offset: [0, 0] };
 
   stage.resize = () => {
     const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -194,75 +196,160 @@ function poseToCamera(camera, { az, pol, dist, target }) {
 const lerp = THREE.MathUtils.lerp;
 const smooth = t => t * t * (3 - 2 * t);
 
-/* ---------- scroll story (hero) ---------- */
-function initStory(gltf) {
-  const canvas = document.getElementById('story-canvas');
-  const section = document.getElementById('showroom');
-  if (!canvas || !section) return;
-  const stage = createStage(canvas);
+/* ---------- showroom: finish selector (hero) + exploded "anatomy of a repair" ---------- */
+// Paint finishes: body colour + material feel, and the colour the page floods with.
+export const FINISHES = [
+  { name: 'Candy Red',     paint: 0x8f0a18, metal: 0.55, rough: 0.28, flood: '#ff2d55' },
+  { name: 'Electric Blue', paint: 0x0a2fe0, metal: 0.6,  rough: 0.25, flood: '#3b82ff' },
+  { name: 'Toxic Lime',    paint: 0x5fb816, metal: 0.45, rough: 0.3,  flood: '#b6ff3b' },
+  { name: 'Pearl',         paint: 0xe6e3dc, metal: 0.25, rough: 0.22, flood: '#cfd6e4', pearl: true },
+  { name: 'Obsidian',      paint: 0x0b0c0f, metal: 0.7,  rough: 0.22, flood: '#8a94a6' },
+  { name: 'Sunset',        paint: 0xff4a10, metal: 0.5,  rough: 0.27, flood: '#ff7a1a' },
+];
+
+// Exploded view: node name -> offset in the model's local frame (x side, y length / front is -y, z up), and a stagger delay.
+const PARTS = [
+  ['WheelFrontL', [0.85, 0, 0], 0.0], ['WheelFrontR', [-0.85, 0, 0], 0.0],
+  ['WheelRearL', [0.85, 0, 0], 0.05], ['WheelRearR', [-0.85, 0, 0], 0.05],
+  ['BodyDoorLColor1', [1.15, 0, 0.12], 0.12], ['BodyDoorRColor1', [-1.15, 0, 0.12], 0.12],
+  ['BodyHood', [0, -0.55, 0.95], 0.2],
+  ['BodyWindshield', [0, -0.25, 0.8], 0.28], ['BodyWindshieldGasket', [0, -0.25, 0.8], 0.28],
+  ['BodyWindshieldWipers', [0, -0.25, 0.8], 0.28], ['BodyWindshieldWipersBase', [0, -0.25, 0.8], 0.28],
+  ['BodyPillars', [0, 0, 0.6], 0.32],
+  ['BodyRoofPanel', [0, 0, 1.25], 0.36],
+  ['BodyRearPanelsColor1', [0, 0.95, 0.4], 0.24],
+];
+// Callout anchors ride on the part they describe.
+const CALLOUT_PART = { 'hood': 'BodyHood', 'front-bumper': 'BodyHood', 'door-l': 'BodyDoorLColor1', 'rear-bumper': 'BodyRearPanelsColor1', 'wheels': 'WheelFrontL', 'roof': 'BodyRoofPanel' };
+
+// Anatomy camera keyframes over scroll progress t (az 0 = nose, 90 = driver side).
+const KEYS = [
+  { t: 0.0,  az: 38,  pol: 72, dist: 10.6, e: 0 },
+  { t: 0.14, az: 52,  pol: 60, dist: 11.2, e: 0.05 },
+  { t: 0.4,  az: 64,  pol: 52, dist: 13.4, e: 1 },
+  { t: 0.62, az: 128, pol: 58, dist: 13.2, e: 1 },
+  { t: 0.8,  az: 196, pol: 64, dist: 12.4, e: 1 },
+  { t: 1.0,  az: 398, pol: 71, dist: 10.4, e: 0 },
+];
+
+export function initShowroom(gltf, canvas, calloutEls = []) {
+  const stage = createStage(canvas, { floor: false });
   const car = cloneCar(gltf);
   stage.addCar(car);
-  setVariant(car, gltf, 0);
+  stage.renderer.toneMappingExposure = 1.12;
 
-  // Camera poses per story step; target is resolved from a zone anchor (or the car centre).
-  const POSES = [
-    // az 0 looks at the nose, 90 at the driver side (+x), 180 at the tail.
-    { az: 50, pol: 71, dist: 11.4, zone: null },           // hero: front three-quarter
-    { az: 96, pol: 76, dist: 6.2, zone: 'door-l' },         // dent removal
-    { az: 28, pol: 42, dist: 6.8, zone: 'hood' },           // paint & colour matching
-    { az: -16, pol: 73, dist: 6.4, zone: 'front-bumper' },  // collision repair
-  ];
-  const centre = new THREE.Vector3(0, 0.55, 0);
-  const targets = POSES.map(p => (p.zone ? stage.anchor(p.zone).lerp(centre, 0.35) : centre.clone()));
-  const markerPts = POSES.map(p => (p.zone ? stage.anchor(p.zone) : null));
+  // Pedestal with a glowing rim and a coloured under-glow, like a product plinth.
+  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(3.05, 3.2, 0.24, 128),
+    new THREE.MeshPhysicalMaterial({ color: 0x0c0e12, metalness: 0.7, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 }));
+  plinth.position.y = -0.12; stage.scene.add(plinth);
+  const rimMat = new THREE.MeshBasicMaterial({ color: 0xff2d55, toneMapped: false });
+  const rimGlow = new THREE.Mesh(new THREE.TorusGeometry(3.13, 0.014, 8, 200), rimMat);
+  rimGlow.rotation.x = Math.PI / 2; rimGlow.position.y = -0.005; stage.scene.add(rimGlow);
+  const glowMat = new THREE.MeshBasicMaterial({ map: radialTexture([[0, 'rgba(255,255,255,.9)'], [0.35, 'rgba(255,255,255,.28)'], [1, 'rgba(255,255,255,0)']]),
+    color: 0xff2d55, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), glowMat);
+  glow.rotation.x = -Math.PI / 2; glow.position.y = -0.26; stage.scene.add(glow);
+  const spot = new THREE.PointLight(0xff2d55, 18, 14, 1.6); spot.position.set(0, 5.5, 0); stage.scene.add(spot);
 
-  const layout = () => {
-    const wide = innerWidth >= 1024;
-    stage.offset = wide ? [0.25, 0] : [0, -0.14];
-    stage.resize();
-  };
+  // Custom paint materials derived from the model's own clear-coated paint.
+  let body = null, accent = null;
+  car.traverse(o => {
+    if (!o.isMesh) return;
+    const n = o.material.name || '';
+    if (n.startsWith('Paint 1')) { body = body || o.material.clone(); o.material = body; }
+    else if (n.startsWith('Paint 2')) { accent = accent || o.material.clone(); o.material = accent; }
+  });
+  if (accent) { accent.color.set(0x0d0e11); accent.metalness = 0.4; accent.roughness = 0.35; }
+  const target = { color: new THREE.Color(), flood: new THREE.Color(), metal: 0.5, rough: 0.3, irid: 0 };
+  const floodNow = new THREE.Color(0xff2d55);
+  function setFinish(i, instant = false) {
+    const f = FINISHES[i];
+    target.color.setHex(f.paint); target.flood.set(f.flood); target.metal = f.metal; target.rough = f.rough; target.irid = f.pearl ? 0.9 : 0;
+    if (instant && body) { body.color.copy(target.color); floodNow.copy(target.flood); }
+  }
+  setFinish(0, true);
+
+  // Exploded view bookkeeping
+  const parts = PARTS.map(([name, off, delay]) => {
+    const node = car.getObjectByName(name);
+    return node && { node, base: node.position.clone(), off: new THREE.Vector3(...off), delay };
+  }).filter(Boolean);
+  const partByName = Object.fromEntries(parts.map(p => [p.node.name, p]));
+  function applyExplode(e) {
+    for (const p of parts) {
+      const k = THREE.MathUtils.clamp((e - p.delay) / (1 - 0.36), 0, 1);
+      const eased = k * k * (3 - 2 * k);
+      p.node.position.copy(p.base).addScaledVector(p.off, eased);
+    }
+  }
+
+  const wide = () => innerWidth >= 1024;
+  const layout = () => { stage.offset = wide() ? [0.12, 0.02] : [0, -0.12]; stage.resize(); };
   layout(); addEventListener('resize', layout);
 
-  let progress = 0, shown = 0, spin = 0, t0 = performance.now();
-  const readProgress = () => {
-    const r = section.getBoundingClientRect(), span = r.height - innerHeight;
-    const p = span > 0 ? Math.min(Math.max(-r.top / span, 0), 1) : 0;
-    progress = p * (POSES.length - 1);
-  };
-  addEventListener('scroll', readProgress, { passive: true }); readProgress();
+  let progress = 0, shown = 0, spin = 0, explodeNow = 0;
+  const centre = new THREE.Vector3(0, 0.62, 0);
+  const tmp = new THREE.Vector3(), proj = new THREE.Vector3();
 
-  addEventListener('car:paint', e => setVariant(car, gltf, e.detail.variant));
+  function sample(t) {
+    let i = 0; while (i < KEYS.length - 2 && t > KEYS[i + 1].t) i++;
+    const A = KEYS[i], B = KEYS[i + 1], f = smooth(THREE.MathUtils.clamp((t - A.t) / (B.t - A.t), 0, 1));
+    return { az: lerp(A.az, B.az, f), pol: lerp(A.pol, B.pol, f), dist: lerp(A.dist, B.dist, f), e: lerp(A.e, B.e, f) };
+  }
 
-  const tmp = new THREE.Vector3();
+  function placeCallouts() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    for (const el of calloutEls) {
+      const zone = el.dataset.callout, part = partByName[CALLOUT_PART[zone]];
+      const a = ZONE_ANCHORS[zone]; if (!a) continue;
+      proj.set(...a);
+      if (part) proj.add(tmp.copy(part.node.position).sub(part.base));
+      stage.frame.localToWorld(proj);
+      proj.project(stage.camera);
+      el.style.transform = `translate3d(${((proj.x + 1) / 2 * w).toFixed(1)}px, ${((1 - proj.y) / 2 * h).toFixed(1)}px, 0)`;
+    }
+  }
+
   function tick(now) {
     requestAnimationFrame(tick);
-    if (!stage.visible || document.hidden) return;
+    if (!stage.visible || document.hidden || canvas.dataset.paused === '1') return;
     const still = reduceMotion.matches;
-    shown = still ? progress : shown + (progress - shown) * 0.09;
-    const i = Math.min(Math.floor(shown), POSES.length - 2), f = smooth(shown - i);
-    const A = POSES[i], B = POSES[i + 1];
-    // Gentle turntable only on the opening frame.
-    const idleWeight = Math.max(0, 1 - shown * 2.5);
-    if (!still) spin += 0.12 * idleWeight;
-    tmp.copy(targets[i]).lerp(targets[i + 1], f);
-    poseToCamera(stage.camera, { az: lerp(A.az, B.az, f) + spin * idleWeight, pol: lerp(A.pol, B.pol, f), dist: lerp(A.dist, B.dist, f), target: tmp });
+    shown = still ? progress : shown + (progress - shown) * 0.12;
+    const k = sample(shown);
+    explodeNow = k.e; applyExplode(explodeNow);
 
-    // Marker pulses on the panel the active step talks about.
-    const active = Math.round(shown), mp = markerPts[active];
-    stage.marker.visible = !!mp && Math.abs(shown - active) < 0.3;
-    if (mp) {
-      stage.marker.position.copy(mp);
-      const pulse = still ? 0.55 : 0.5 + 0.12 * Math.sin((now - t0) / 260);
-      stage.marker.scale.setScalar(pulse);
+    // Turntable on the hero; once the story starts, settle back to the nearest full turn.
+    if (shown < 0.005 && !still) spin += 0.14;
+    else spin += (Math.round(spin / 360) * 360 - spin) * 0.06;
+    poseToCamera(stage.camera, { az: k.az + spin, pol: k.pol, dist: k.dist, target: centre });
+
+    // Paint + flood colour easing
+    if (body) {
+      const r = still ? 1 : 0.07;
+      body.color.lerp(target.color, r);
+      body.metalness += (target.metal - body.metalness) * r;
+      body.roughness += (target.rough - body.roughness) * r;
+      body.iridescence = (body.iridescence || 0) + (target.irid - (body.iridescence || 0)) * r;
+      floodNow.lerp(target.flood, r);
+      rimMat.color.copy(floodNow); glowMat.color.copy(floodNow).multiplyScalar(0.55); spot.color.copy(floodNow);
+      stage.rim.color.copy(floodNow);
     }
+    const lift = still ? 0 : Math.sin(now / 900) * 0.02;
+    car.position.y = (car.userData.baseY ??= car.position.y) + lift * (1 - explodeNow);
     stage.render();
+    if (calloutEls.length) placeCallouts();
   }
   requestAnimationFrame(tick);
-  return stage;
+
+  return {
+    setFinish,
+    setProgress(p) { progress = THREE.MathUtils.clamp(p, 0, 1); },
+    get explode() { return explodeNow; },
+  };
 }
 
 /* ---------- damage estimator ---------- */
-function initEstimator(gltf) {
+export function initEstimator(gltf) {
   const canvas = document.getElementById('estimator-canvas');
   if (!canvas) return;
   const stage = createStage(canvas);
@@ -359,23 +446,8 @@ function initEstimator(gltf) {
   requestAnimationFrame(tick);
 }
 
-/* ---------- boot ---------- */
-function webglAvailable() {
+/* ---------- boot helpers (used by app.js) ---------- */
+export function webglAvailable() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
 }
-
-if (webglAvailable()) {
-  // Defer the 2.5 MB model until the page has painted.
-  const start = () => loadModel().then(gltf => {
-    initStory(gltf);
-    initEstimator(gltf);
-    document.documentElement.classList.add('has-3d');
-    dispatchEvent(new Event('car:ready'));
-  }).catch(err => {
-    console.warn('3D model failed to load; showing the photo fallback instead.', err);
-    document.documentElement.classList.add('no-3d');
-  });
-  if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 }); else setTimeout(start, 300);
-} else {
-  document.documentElement.classList.add('no-3d');
-}
+export { loadModel };

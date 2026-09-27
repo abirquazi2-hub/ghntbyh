@@ -46,11 +46,13 @@ To rebuild the model from the original, see "Rebuilding the 3D model" in `README
 | Inter (variable) | [@fontsource-variable/inter](https://www.npmjs.com/package/@fontsource-variable/inter) | SIL Open Font License 1.1 |
 | JetBrains Mono (500) | [@fontsource/jetbrains-mono](https://www.npmjs.com/package/@fontsource/jetbrains-mono) | SIL Open Font License 1.1 |
 
-## Code libraries (bundled into `assets/js/car3d.js`)
+## Code libraries (bundled into `assets/js/app.js`)
 
 | Library | Version | Licence |
 |---|---|---|
 | three.js (core, GLTFLoader, OrbitControls, RoomEnvironment, BufferGeometryUtils, meshopt decoder) | 0.160.0 | MIT: see `LICENSES/three.js.txt`. The meshopt decoder is also MIT (© Arseny Kapoulkine). |
+| GSAP + ScrollTrigger (scroll animation) | 3.15 | GSAP Standard "No Charge" License: free, including commercial use (https://gsap.com/standard-license). |
+| Lenis (smooth scrolling) | 1.3 | MIT |
 | Tailwind CSS (build-time only; not shipped as a runtime) | 4.x | MIT |
 | esbuild (build-time only) | 0.25 | MIT |
 

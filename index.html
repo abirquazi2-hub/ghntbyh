@@ -11,7 +11,7 @@
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/site.js" defer></script>
-<script src="assets/js/car3d.js" defer></script>
+<script src="assets/js/app.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"AutoBodyShop","name":"Art's Autobody & Collision Centre","telephone":"+1-613-237-2102","email":"yasir@artsautobody.ca","address":{"@type":"PostalAddress","streetAddress":"2407 A Kaladar Ave","addressLocality":"Ottawa","addressRegion":"ON","postalCode":"K1V 8B9","addressCountry":"CA"},"geo":{"@type":"GeoCoordinates","latitude":45.3780171,"longitude":-75.6709331},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"10:00","closes":"19:30"}]}
 </script>
@@ -19,8 +19,28 @@
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
 
+<!-- Intro (decorative; removed after load, skipped with reduced motion) -->
+<div id="intro" aria-hidden="true">
+  <div class="intro-inner">
+    <p class="intro-mask"><span class="intro-line">Art's</span></p>
+    <p class="intro-mask"><span class="intro-line">Autobody</span></p>
+    <p class="intro-mask intro-meta"><span class="intro-line">Collision Centre · Ottawa</span><span class="intro-line" id="intro-count">000</span></p>
+  </div>
+</div>
+
+<!-- Colour flood + 3D stage (fixed behind the hero and the anatomy story) -->
+<div id="flood" aria-hidden="true"></div>
+<div id="flood-wipe" aria-hidden="true"></div>
+<div id="stage" aria-hidden="true">
+  <picture class="fallback-3d absolute inset-0">
+    <source media="(max-width: 800px)" srcset="assets/img/shop/maserati-front-800.webp">
+    <img class="size-full object-cover opacity-40" src="assets/img/shop/maserati-front-1600.webp" alt="" width="1600" height="1200">
+  </picture>
+  <canvas id="stage-canvas" class="absolute inset-0 size-full"></canvas>
+</div>
+
 <!-- ============ HEADER ============ -->
-<header class="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-ink-950/80 backdrop-blur-xl">
+<header class="site-header fixed inset-x-0 top-0 z-50">
   <div class="wrap flex h-18 items-center gap-4">
     <a href="#top" class="mr-auto flex items-center gap-3 rounded-lg" aria-label="Art's Autobody and Collision Centre, back to top">
       <svg class="size-10 shrink-0" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#15181d" stroke="#2a2f38"/><path d="M9 26 17.5 11h5L31 26h-5.2l-1.6-3h-8.4l-1.6 3zm8.9-7h4.2L20 15z" fill="#4aa8ff"/><path d="M9 29h22" stroke="#c6ff4d" stroke-width="2" stroke-linecap="round"/></svg>
@@ -28,18 +48,18 @@
     </a>
     <nav id="site-nav" aria-label="Main" class="nav-panel max-lg:absolute max-lg:inset-x-0 max-lg:top-full max-lg:hidden max-lg:border-b max-lg:border-white/10 max-lg:bg-ink-950 max-lg:px-4 max-lg:pb-5 max-lg:pt-2">
       <ul class="flex gap-1 max-lg:flex-col">
-        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-mist hover:text-text lg:py-2" href="#services">Services</a></li>
-        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-mist hover:text-text lg:py-2" href="#estimator">Damage estimator</a></li>
-        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-mist hover:text-text lg:py-2" href="#results">Results</a></li>
-        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-mist hover:text-text lg:py-2" href="#reviews">Reviews</a></li>
-        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-mist hover:text-text lg:py-2" href="#contact">Contact</a></li>
+        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-text/80 hover:text-text lg:py-2" href="#anatomy">The process</a></li>
+        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-text/80 hover:text-text lg:py-2" href="#services">Services</a></li>
+        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-text/80 hover:text-text lg:py-2" href="#estimator">Damage estimator</a></li>
+        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-text/80 hover:text-text lg:py-2" href="#work">Our work</a></li>
+        <li><a class="block rounded-lg px-3 py-3 text-[0.9375rem] font-medium text-text/80 hover:text-text lg:py-2" href="#contact">Contact</a></li>
       </ul>
     </nav>
     <a class="btn btn-primary btn-sm magnetic max-sm:size-12 max-sm:px-0" href="tel:+16132372102">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
       <span class="max-sm:sr-only"><span class="sm:hidden">Call </span>613-237-2102</span>
     </a>
-    <button type="button" id="nav-toggle" class="grid size-12 place-items-center rounded-xl border border-ink-600 lg:hidden" aria-expanded="false" aria-controls="site-nav">
+    <button type="button" id="nav-toggle" class="grid size-12 place-items-center rounded-xl border border-ink-600 bg-ink-950/60 lg:hidden" aria-expanded="false" aria-controls="site-nav">
       <span class="sr-only">Menu</span>
       <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close hidden" d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -49,139 +69,109 @@
 <main id="main" tabindex="-1">
 <span id="top"></span>
 
-<!-- ============ HERO + 3D SCROLL STORY ============ -->
-<section id="showroom" class="relative" aria-labelledby="hero-title">
-  <div class="story-stage sticky top-0 h-svh overflow-hidden">
-    <div class="stage-glow absolute inset-0" aria-hidden="true"></div>
-    <div class="loading-3d absolute inset-0" aria-hidden="true"></div>
-    <picture class="fallback-3d absolute inset-0">
-      <source media="(max-width: 800px)" srcset="assets/img/shop/maserati-front-800.webp">
-      <img class="size-full object-cover opacity-50" src="assets/img/shop/maserati-front-1600.webp" alt="" width="1600" height="1200">
-    </picture>
-    <canvas id="story-canvas" class="absolute inset-0 size-full" aria-hidden="true"></canvas>
-  </div>
+<!-- ============ HERO: finish selector ============ -->
+<section id="hero" class="relative h-svh min-h-[40rem] overflow-hidden" aria-labelledby="hero-title">
+  <!-- Giant finish name sits behind the 3D car -->
+  <p class="hero-giant" aria-hidden="true"><span id="finish-name">Candy Red</span></p>
 
-  <div class="relative -mt-[100svh]">
-    <!-- Hero -->
-    <div class="wrap flex min-h-svh items-end pb-16 pt-28 lg:items-center lg:pb-0">
-      <div class="max-w-2xl">
-        <p class="chip"><span class="size-2 rounded-full bg-lime" aria-hidden="true"></span>Ottawa · Kaladar Ave · 30+ years</p>
-        <h1 id="hero-title" class="mt-6 text-[2.5rem] font-extrabold min-[400px]:text-5xl sm:text-6xl xl:text-7xl">Bring it in bent. Drive it out <span class="grad-text">flawless.</span></h1>
-        <p class="lede text-text/85">Collision repair, dent removal and digitally colour-matched paint, done by an owner-operated shop that treats your car like its own.</p>
-        <div class="mt-8 flex flex-wrap gap-3">
+  <div class="hero-ui wrap relative z-10 flex h-full flex-col justify-end pb-8 pt-24 lg:pb-12">
+    <div class="grid items-end gap-8 lg:grid-cols-[1.1fr_1fr]">
+      <div>
+        <p class="hero-fade chip"><span class="size-2 rounded-full bg-lime" aria-hidden="true"></span>Ottawa · 30+ years · Free consultations</p>
+        <h1 id="hero-title" class="mt-5 text-[2.6rem] font-extrabold leading-[0.95] min-[400px]:text-5xl sm:text-6xl xl:text-[5.5rem]">
+          <span class="mask"><span class="hero-rise">Bring it in bent.</span></span>
+          <span class="mask"><span class="hero-rise">Drive it out</span></span>
+          <span class="mask"><span class="hero-rise grad-flood">flawless.</span></span>
+        </h1>
+        <div class="hero-fade mt-7 flex flex-wrap gap-3">
           <a class="btn btn-primary magnetic" href="#contact">Get a free estimate
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-ghost magnetic" href="#estimator">Try the damage estimator</a>
         </div>
-        <dl class="mt-10 grid max-w-lg grid-cols-3 gap-3 max-[419px]:grid-cols-1">
-          <div class="card px-4 py-3"><dt class="text-sm text-mist">Years of experience</dt><dd class="font-display text-2xl font-extrabold">30+</dd></div>
-          <div class="card px-4 py-3"><dt class="text-sm text-mist">Google rating</dt><dd class="font-display text-2xl font-extrabold">4.5<span class="text-lime" aria-hidden="true"> ★</span><span class="sr-only"> out of 5</span></dd></div>
-          <div class="card px-4 py-3"><dt class="text-sm text-mist">Consultation</dt><dd class="font-display text-2xl font-extrabold">Free</dd></div>
-        </dl>
       </div>
-    </div>
 
-    <!-- Story steps -->
-    <article class="wrap flex min-h-svh items-end pb-16 lg:items-center lg:pb-0" aria-labelledby="st1">
-      <div class="card max-w-md p-6 backdrop-blur-md sm:p-8">
-        <p class="font-mono text-sm uppercase tracking-[0.16em] text-volt">01 · Dent removal</p>
-        <h2 id="st1" class="mt-3 text-3xl font-extrabold sm:text-4xl">Dents pulled back to factory lines.</h2>
-        <p class="mt-4 text-mist">Door dings, hail marks and creases are reshaped back to the panel's original contour. Where the paint is unbroken, we can often avoid a repaint entirely, which keeps your factory finish.</p>
-      </div>
-    </article>
-    <article class="wrap flex min-h-svh items-end pb-16 lg:items-center lg:pb-0" aria-labelledby="st2">
-      <div class="card max-w-md p-6 backdrop-blur-md sm:p-8">
-        <p class="font-mono text-sm uppercase tracking-[0.16em] text-volt">02 · Paint &amp; colour matching</p>
-        <h2 id="st2" class="mt-3 text-3xl font-extrabold sm:text-4xl">Your exact shade. Not "close enough".</h2>
-        <p class="mt-4 text-mist">Digital colour matching finds your factory colour, including years of fade, so new paint disappears into the original. Masked, primed, then booth-sprayed with base coat and clear coat.</p>
-        <fieldset class="only-3d mt-6">
-          <legend class="text-[0.9375rem] font-semibold">Preview a finish on the 3D car</legend>
-          <div class="mt-3 flex flex-wrap gap-2" id="paint-swatches">
-            <label class="opt"><input type="radio" name="paint" value="0" checked><span><i class="size-4 rounded-full bg-[#8d0f1c] ring-1 ring-white/30" aria-hidden="true"></i>Candy red</span></label>
-            <label class="opt"><input type="radio" name="paint" value="1"><span><i class="size-4 rounded-full bg-[#d9dde4] ring-1 ring-white/30" aria-hidden="true"></i>Pearl</span></label>
-            <label class="opt"><input type="radio" name="paint" value="2"><span><i class="size-4 rounded-full bg-[#3c4049] ring-1 ring-white/30" aria-hidden="true"></i>Graphite</span></label>
-          </div>
-        </fieldset>
-      </div>
-    </article>
-    <article class="wrap flex min-h-svh items-end pb-16 lg:items-center lg:pb-0" aria-labelledby="st3">
-      <div class="card max-w-md p-6 backdrop-blur-md sm:p-8">
-        <p class="font-mono text-sm uppercase tracking-[0.16em] text-volt">03 · Collision repair</p>
-        <h2 id="st3" class="mt-3 text-3xl font-extrabold sm:text-4xl">Back to pre-accident condition.</h2>
-        <p class="mt-4 text-mist">From a fender bender to heavy body damage, we repair or replace what's needed. One customer's cargo van, which the insurer wanted to write off, left our shop in like-new condition.</p>
-        <a class="btn btn-ghost btn-sm mt-6" href="#estimator">Show us where it's damaged</a>
-      </div>
-    </article>
+      <fieldset class="hero-fade finish-picker lg:justify-self-end">
+        <legend class="flex w-full items-baseline justify-between gap-6 text-[0.9375rem] font-semibold">
+          <span>Pick a finish. Watch it change.</span>
+          <span class="font-mono text-sm text-mist" aria-hidden="true"><span id="finish-index">01</span> / 06</span>
+        </legend>
+        <div id="finishes" class="mt-3 flex flex-wrap gap-2.5">
+          <label class="swatch" style="--c:#8f0a18"><input type="radio" name="finish" value="0" checked><span><i></i>Candy Red</span></label>
+          <label class="swatch" style="--c:#1a3cf0"><input type="radio" name="finish" value="1"><span><i></i>Electric Blue</span></label>
+          <label class="swatch" style="--c:#6fcf1a"><input type="radio" name="finish" value="2"><span><i></i>Toxic Lime</span></label>
+          <label class="swatch" style="--c:#e6e3dc"><input type="radio" name="finish" value="3"><span><i></i>Pearl</span></label>
+          <label class="swatch" style="--c:#1b1d22"><input type="radio" name="finish" value="4"><span><i></i>Obsidian</span></label>
+          <label class="swatch" style="--c:#ff4a10"><input type="radio" name="finish" value="5"><span><i></i>Sunset</span></label>
+        </div>
+        <p class="mt-3 text-sm text-mist">Digital colour matching means your repair matches <em>your</em> car's exact shade, whatever it is.</p>
+      </fieldset>
+    </div>
+    <p class="hero-fade scroll-cue" aria-hidden="true"><i></i>Scroll to take it apart</p>
   </div>
 </section>
 
-<!-- ============ SERVICES (bento) ============ -->
-<section id="services" class="py-24 sm:py-32" aria-labelledby="services-title">
-  <div class="wrap">
-    <div class="reveal max-w-3xl">
-      <p class="eyebrow">Services</p>
-      <h2 id="services-title" class="h-section">Every panel. <span class="grad-text">Every finish.</span></h2>
-      <p class="lede">Everything happens under one roof on Kaladar Ave, from the first look at the damage to the final polish.</p>
+<!-- ============ ANATOMY OF A REPAIR (pinned scroll story) ============ -->
+<section id="anatomy" class="relative h-[480svh]" aria-labelledby="anatomy-title">
+  <div class="sticky top-0 h-svh overflow-hidden">
+    <!-- Labels that follow the 3D panels (decorative; the steps below carry the same information) -->
+    <div class="callouts only-3d" aria-hidden="true">
+      <div class="callout" data-callout="wheels"><i></i><span>Hidden damage check</span></div>
+      <div class="callout" data-callout="door-l"><i></i><span>Dent removal</span></div>
+      <div class="callout" data-callout="hood"><i></i><span>Paint &amp; colour match</span></div>
+      <div class="callout" data-callout="front-bumper"><i></i><span>Collision repair</span></div>
+      <div class="callout" data-callout="rear-bumper"><i></i><span>Repair or replace</span></div>
     </div>
 
-    <div class="mt-14 grid auto-rows-[minmax(16rem,auto)] gap-4 md:grid-cols-6">
-      <article class="reveal card group relative overflow-hidden md:col-span-4 md:row-span-2">
-        <img class="absolute inset-0 size-full object-cover opacity-45 transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/blue-front-finished-1600.webp" srcset="assets/img/shop/blue-front-finished-800.webp 800w, assets/img/shop/blue-front-finished-1600.webp 1600w" sizes="(min-width: 768px) 66vw, 100vw" alt="" width="1600" height="1600" loading="lazy">
-        <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/75 to-ink-950/10" aria-hidden="true"></div>
-        <div class="relative flex h-full flex-col justify-end p-7 sm:p-10">
-          <p class="font-mono text-sm uppercase tracking-[0.16em] text-volt">Collision repair</p>
-          <h3 class="mt-3 max-w-lg text-3xl font-extrabold sm:text-4xl">Restored to pre-accident condition, inside and out.</h3>
-          <ul class="mt-6 grid gap-2 text-text/90 sm:grid-cols-2">
-            <li class="flex gap-2"><span class="text-lime" aria-hidden="true">→</span>Full inspection and an honest estimate</li>
-            <li class="flex gap-2"><span class="text-lime" aria-hidden="true">→</span>Bumper, fender, door and quarter-panel repair</li>
-            <li class="flex gap-2"><span class="text-lime" aria-hidden="true">→</span>Panel replacement when repair isn't the right call</li>
-            <li class="flex gap-2"><span class="text-lime" aria-hidden="true">→</span>Final quality check before pickup</li>
-          </ul>
-        </div>
-      </article>
-
-      <article class="reveal card relative flex flex-col justify-between overflow-hidden p-7 md:col-span-2">
-        <svg class="size-12 text-volt" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 30c6-10 12-14 18-14s12 4 18 14"/><path d="M14 30c3-5 6-7 10-7s7 2 10 7" stroke-dasharray="3 4"/><circle cx="24" cy="30" r="3" fill="currentColor"/></svg>
-        <div>
-          <h3 class="text-2xl font-extrabold">Dent removal</h3>
-          <p class="mt-2 text-mist">Dings, creases and hail marks reshaped. Factory paint preserved wherever possible.</p>
-        </div>
-      </article>
-
-      <article class="reveal card group relative overflow-hidden md:col-span-2">
-        <img class="absolute inset-0 size-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/coupe-booth-masking-800.webp" alt="" width="800" height="600" loading="lazy">
-        <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/70 to-transparent" aria-hidden="true"></div>
-        <div class="relative flex h-full flex-col justify-end p-7">
-          <h3 class="text-2xl font-extrabold">Auto body paint</h3>
-          <p class="mt-2 text-text/85">Digitally colour-matched, booth-sprayed, blended so the repair can't be seen.</p>
-        </div>
-      </article>
-
-      <article class="reveal card flex flex-col justify-between p-7 md:col-span-2">
-        <p class="font-display text-6xl font-extrabold text-lime">$0</p>
-        <div>
-          <h3 class="text-2xl font-extrabold">Free consultations</h3>
-          <p class="mt-2 text-mist">A straight answer on what the repair involves, and whether going through insurance makes sense. No pressure.</p>
-        </div>
-      </article>
-
-      <article class="reveal card flex flex-col justify-between p-7 md:col-span-2">
-        <svg class="size-12 text-volt" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="24" cy="17" r="7"/><path d="M10 40c2-8 8-12 14-12s12 4 14 12"/></svg>
-        <div>
-          <h3 class="text-2xl font-extrabold">Owner-operated</h3>
-          <p class="mt-2 text-mist">Yasir is on-site and hands-on, so you deal directly with the person who knows your car and your timeline.</p>
-        </div>
-      </article>
-
-      <article class="reveal card flex flex-col justify-between p-7 md:col-span-2">
-        <svg class="size-12 text-volt" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M24 8a16 16 0 0 1 0 32z" fill="currentColor" fill-opacity=".25"/><circle cx="24" cy="24" r="5"/></svg>
-        <div>
-          <h3 class="text-2xl font-extrabold">Digital colour matching</h3>
-          <p class="mt-2 text-mist">We read your paint code and account for fade, so a new panel matches the rest of the car.</p>
-        </div>
-      </article>
+    <div class="wrap relative z-10 flex h-full flex-col justify-between pb-8 pt-28 lg:pb-12">
+      <div class="max-w-xl">
+        <p class="eyebrow">The process</p>
+        <h2 id="anatomy-title" class="h-section">Anatomy of a <span class="grad-flood">repair.</span></h2>
+      </div>
+      <ol class="anatomy-steps grid gap-3 sm:grid-cols-2 lg:max-w-4xl lg:grid-cols-4">
+        <li data-step class="is-active"><p class="num">01</p><h3>Strip &amp; inspect</h3><p>When it's needed, panels come off so hidden damage behind them isn't missed.</p></li>
+        <li data-step><p class="num">02</p><h3>Metal &amp; dent work</h3><p>Dents are pulled back to factory body lines. Damaged parts are repaired, or replaced when repair isn't the right call.</p></li>
+        <li data-step><p class="num">03</p><h3>Paint &amp; colour match</h3><p>Digitally matched colour, booth-sprayed base coat and clear coat, blended so the repair disappears.</p></li>
+        <li data-step><p class="num">04</p><h3>Reassemble &amp; inspect</h3><p>Every panel refitted, gaps and alignment checked in full light. Then the keys go back to you.</p></li>
+      </ol>
     </div>
   </div>
+</section>
+
+<!-- ============ KINETIC STATEMENT ============ -->
+<section id="statement" class="solid relative overflow-hidden py-24 sm:py-36" aria-labelledby="statement-title">
+  <div class="marquee" aria-hidden="true">
+    <p data-marquee="1">Collision <em>·</em> Dents <em>·</em> Paint <em>·</em> Colour match <em>·</em> Collision <em>·</em> Dents <em>·</em> Paint <em>·</em></p>
+    <p data-marquee="-1" class="outline">Ottawa <em>·</em> Kaladar Ave <em>·</em> Since the '90s <em>·</em> Ottawa <em>·</em> Kaladar Ave <em>·</em></p>
+  </div>
+  <div class="wrap mt-20 grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+    <h2 id="statement-title" class="rise-lines text-4xl font-extrabold sm:text-6xl">
+      <span class="rl"><span>30 years.</span></span>
+      <span class="rl"><span>One standard:</span></span>
+      <span class="rl"><span class="grad-text">repairs you can't see.</span></span>
+    </h2>
+    <dl class="grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
+      <div><dt class="text-sm text-mist">Years of experience</dt><dd class="mt-1 font-display text-4xl font-extrabold sm:text-5xl"><span data-count="30">30</span>+</dd></div>
+      <div><dt class="text-sm text-mist">Google rating</dt><dd class="mt-1 font-display text-4xl font-extrabold sm:text-5xl"><span data-count="4.5">4.5</span><span class="sr-only"> out of 5</span></dd></div>
+      <div><dt class="text-sm text-mist">Consultation</dt><dd class="mt-1 font-display text-4xl font-extrabold sm:text-5xl">$<span data-count="0">0</span></dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ SERVICES (editorial rows) ============ -->
+<section id="services" class="solid relative border-t border-white/[0.06] py-24 sm:py-32" aria-labelledby="services-title">
+  <div class="wrap">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div><p class="eyebrow">Services</p><h2 id="services-title" class="h-section">Every panel. <span class="grad-text">Every finish.</span></h2></div>
+      <p class="max-w-sm text-mist">Everything happens under one roof on Kaladar Ave, from the first look at the damage to the final polish.</p>
+    </div>
+    <ol class="svc-rows mt-14">
+      <li data-img="assets/img/shop/blue-front-finished-800.webp"><span class="n">01</span><h3>Collision repair</h3><p>From a fender bender to heavy body damage, restored to pre-accident condition. Bumpers, fenders, doors and quarter panels repaired, or replaced when repair isn't the right call.</p></li>
+      <li data-img="assets/img/shop/bumper-prep-masked-800.webp"><span class="n">02</span><h3>Dent removal</h3><p>Dings, creases and hail marks reshaped back to the panel's original lines. Factory paint preserved wherever possible.</p></li>
+      <li data-img="assets/img/shop/coupe-booth-masking-800.webp"><span class="n">03</span><h3>Paint &amp; colour matching</h3><p>We read your paint code and account for fade, then mask, prime and booth-spray, blending so the repair can't be seen.</p></li>
+      <li data-img="assets/img/shop/maserati-front-800.webp"><span class="n">04</span><h3>Free consultations</h3><p>A straight answer on what the repair involves, what it should cost and whether insurance makes sense. With owner Yasir, hands-on, no pressure.</p></li>
+    </ol>
+  </div>
+  <div id="svc-float" aria-hidden="true"><img src="data:," alt=""></div>
 </section>
 
 <!-- ============ DAMAGE ESTIMATOR ============ -->
@@ -273,17 +263,25 @@
         <figcaption class="mt-3 text-[0.9375rem] text-mist">Side panels: booth-sprayed base coat and clear coat.</figcaption>
       </figure>
     </div>
-
-    <!-- Gallery -->
-    <h3 class="reveal mt-24 font-display text-3xl font-extrabold">From the shop floor</h3>
-    <ul class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:grid-rows-2" id="gallery">
-      <li class="col-span-2 row-span-2"><button type="button" class="group relative block size-full overflow-hidden rounded-xl3 border border-white/10" data-full="assets/img/shop/maserati-rear-1600.webp"><img class="size-full object-cover transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/maserati-rear-800.webp" alt="Black Maserati GranTurismo, rear three-quarter view, in the shop lot" width="800" height="600" loading="lazy"><span class="sr-only">Open larger photo</span></button></li>
-      <li><button type="button" class="group relative block aspect-square w-full overflow-hidden rounded-xl3 border border-white/10" data-full="assets/img/shop/mercedes-c-class-1600.webp"><img class="size-full object-cover transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/mercedes-c-class-800.webp" alt="Red Mercedes-Benz C-Class parked in the snow" width="800" height="800" loading="lazy"><span class="sr-only">Open larger photo</span></button></li>
-      <li><button type="button" class="group relative block aspect-square w-full overflow-hidden rounded-xl3 border border-white/10" data-full="assets/img/shop/infiniti-g-coupe-1600.webp"><img class="size-full object-cover transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/infiniti-g-coupe-800.webp" alt="Red Infiniti G coupe, front view" width="800" height="600" loading="lazy"><span class="sr-only">Open larger photo</span></button></li>
-      <li><button type="button" class="group relative block aspect-square w-full overflow-hidden rounded-xl3 border border-white/10" data-full="assets/img/shop/primer-bumper-masked-1600.webp"><img class="size-full object-cover transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/primer-bumper-masked-800.webp" alt="Blue front bumper masked in yellow tape, ready for paint" width="800" height="800" loading="lazy"><span class="sr-only">Open larger photo</span></button></li>
-      <li><button type="button" class="group relative block aspect-square w-full overflow-hidden rounded-xl3 border border-white/10" data-full="assets/img/shop/maserati-front-1600.webp"><img class="size-full object-cover transition-transform duration-700 group-hover:scale-105" src="assets/img/shop/maserati-front-800.webp" alt="Black Maserati GranTurismo, front view" width="800" height="600" loading="lazy"><span class="sr-only">Open larger photo</span></button></li>
-    </ul>
   </div>
+</section>
+
+<!-- ============ WORK (horizontal gallery) ============ -->
+<section id="work" class="solid relative overflow-hidden border-t border-white/[0.06] py-20 lg:flex lg:h-svh lg:items-center lg:py-0" aria-labelledby="work-title">
+  <ul id="work-track" class="work-track">
+    <li class="work-intro">
+      <p class="eyebrow">Our work</p>
+      <h2 id="work-title" class="h-section">Real cars.<br><span class="grad-text">Real finishes.</span></h2>
+      <p class="mt-5 max-w-xs text-mist">Photos from our shop floor. Select any photo to see it larger.</p>
+      <p class="mt-6 hidden font-mono text-sm text-mist lg:block" aria-hidden="true">Keep scrolling →</p>
+    </li>
+    <li><button type="button" class="work-card" data-full="assets/img/shop/maserati-rear-1600.webp"><img src="assets/img/shop/maserati-rear-800.webp" alt="Black Maserati GranTurismo, rear three-quarter view, in the shop lot" width="800" height="600" loading="lazy"><span class="cap">Maserati GranTurismo</span></button></li>
+    <li><button type="button" class="work-card" data-full="assets/img/shop/blue-coupe-finished-1600.webp"><img src="assets/img/shop/blue-coupe-finished-800.webp" alt="Blue coupe side panels with a glossy finish after paint" width="800" height="600" loading="lazy"><span class="cap">Side panels · clear coat</span></button></li>
+    <li><button type="button" class="work-card tall" data-full="assets/img/shop/mercedes-c-class-1600.webp"><img src="assets/img/shop/mercedes-c-class-800.webp" alt="Red Mercedes-Benz C-Class parked in the snow" width="800" height="800" loading="lazy"><span class="cap">Mercedes C-Class</span></button></li>
+    <li><button type="button" class="work-card" data-full="assets/img/shop/infiniti-g-coupe-1600.webp"><img src="assets/img/shop/infiniti-g-coupe-800.webp" alt="Red Infiniti G coupe, front view" width="800" height="600" loading="lazy"><span class="cap">Infiniti G coupe</span></button></li>
+    <li><button type="button" class="work-card tall" data-full="assets/img/shop/primer-bumper-masked-1600.webp"><img src="assets/img/shop/primer-bumper-masked-800.webp" alt="Blue front bumper masked in yellow tape, ready for paint" width="800" height="800" loading="lazy"><span class="cap">Masked for paint</span></button></li>
+    <li><button type="button" class="work-card" data-full="assets/img/shop/maserati-front-1600.webp"><img src="assets/img/shop/maserati-front-800.webp" alt="Black Maserati GranTurismo, front view" width="800" height="600" loading="lazy"><span class="cap">Maserati · front</span></button></li>
+  </ul>
 </section>
 
 <dialog id="lightbox" class="lightbox m-auto max-h-[92vh] w-[min(1100px,94vw)] rounded-xl3 border border-white/15 bg-ink-900 p-0 text-text" aria-label="Photo viewer">
@@ -454,6 +452,8 @@
   </div>
 </section>
 </main>
+
+<div class="wordmark solid" aria-hidden="true"><span>Art's</span><span class="outline">Autobody</span></div>
 
 <!-- ============ FOOTER ============ -->
 <footer class="border-t border-white/[0.06] py-14">

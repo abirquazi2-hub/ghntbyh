@@ -18,7 +18,6 @@
     initHours();
     initQuoteForm();
     initEstimator();
-    initPaint();
     initMagnetic();
     // If the 3D script never finishes (blocked, very old browser), show the photo fallbacks.
     setTimeout(() => { if (!doc.classList.contains('has-3d')) doc.classList.add('no-3d'); }, 30000);
@@ -26,6 +25,8 @@
 
   /* ---------- mobile navigation ---------- */
   function initNav() {
+    const header = $('.site-header');
+    if (header) { const upd = () => header.classList.toggle('scrolled', scrollY > 40); addEventListener('scroll', upd, { passive: true }); upd(); }
     const btn = $('#nav-toggle'), nav = $('#site-nav');
     if (!btn || !nav) return;
     const set = open => {
@@ -70,7 +71,7 @@
   function initLightbox() {
     const dlg = $('#lightbox'), img = $('#lightbox-img'), cap = $('#lightbox-cap');
     if (!dlg || typeof dlg.showModal !== 'function') return;
-    $$('#gallery button[data-full]').forEach(b => b.addEventListener('click', () => {
+    $$('#work-track button[data-full]').forEach(b => b.addEventListener('click', () => {
       const thumb = $('img', b);
       img.src = b.dataset.full; img.alt = thumb.alt; cap.textContent = thumb.alt;
       dlg.showModal();
@@ -275,10 +276,6 @@
 
     $$('[data-rotate]').forEach(b => b.addEventListener('click', () => dispatchEvent(new CustomEvent('car:rotate', { detail: { dir: +b.dataset.rotate } }))));
     render();
-  }
-
-  function initPaint() {
-    $$('#paint-swatches input').forEach(i => i.addEventListener('change', () => dispatchEvent(new CustomEvent('car:paint', { detail: { variant: +i.value } }))));
   }
 
   /* ---------- subtle magnetic buttons (fine pointers only, off with reduced motion) ---------- */

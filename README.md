@@ -4,7 +4,7 @@ A static website with no server code, no cookies and no third-party requests.
 
 | Page | What it is |
 |---|---|
-| `index.html` | Landing page: 3D scroll story, services, interactive damage estimator, before/after sliders, gallery, reviews, contact form |
+| `index.html` | Landing page: 3D finish selector, exploded-view repair story, services, interactive damage estimator, before/after sliders, work gallery, reviews, contact form |
 | `privacy.html` | Privacy Policy |
 | `cookies.html` | Cookie Policy (the site uses no cookies) |
 | `terms.html` | Terms of Use |
@@ -32,7 +32,7 @@ npm run watch:css    # rebuild CSS on every change while editing
 ```
 
 - Styles come from `src/input.css` (Tailwind CSS v4), built into `assets/css/site.css`. Tailwind isn't loaded from a CDN or run in the browser.
-- The 3D code comes from `src/car3d.js`, bundled with three.js into `assets/js/car3d.js` (`npm run build:js`).
+- Animation and 3D code come from `src/app.js` (scroll choreography with GSAP and Lenis) and `src/car3d.js` (three.js scenes), bundled into `assets/js/app.js` (`npm run build:js`).
 - The 3D model's source is `src/models/car-concept.glb`. `npm run build:model` wraps it into `assets/models/car-concept.glb.js`, which is what lets the site work from disk.
 - Opening hours appear in three places: the hours list in `index.html`, the "open now" logic in `assets/js/site.js` (`initHours`), and the JSON-LD block in the `<head>` of `index.html`.
 - The Google rating (4.5) and the reviews are copied from Google. Update them by hand; they don't sync.
@@ -41,7 +41,7 @@ npm run watch:css    # rebuild CSS on every change while editing
 
 ```
 assets/js/site.js              page behaviour (menu, sliders, gallery, form, estimator logic)
-assets/js/car3d.js             built 3D bundle (three.js + src/car3d.js), don't edit by hand
+assets/js/app.js               built bundle (three.js, GSAP, Lenis, src/app.js + src/car3d.js), don't edit by hand
 assets/models/car-concept.glb.js   built model (base64), don't edit by hand
 assets/img/shop/               the shop's own photos (plates blurred, metadata stripped)
 assets/fonts/                  self-hosted fonts
