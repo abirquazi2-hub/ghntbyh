@@ -193,7 +193,7 @@ main section:not(#hero):not(#anatomy), .wordmark, footer { position: relative; z
 .hero-giant { position: absolute; inset: 0; z-index: 0; display: grid; place-items: center; pointer-events: none; overflow: hidden; }
 .hero-giant span { display: block; white-space: nowrap; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: -.05em; line-height: .8;
   font-size: clamp(5rem, 21vw, 22rem); color: transparent; -webkit-text-stroke: 1.5px color-mix(in oklab, var(--flood) 70%, white); opacity: .32; transform: translateY(-24%); transition: -webkit-text-stroke-color .9s; }
-.hero-title { font-size: clamp(2.5rem, 5.4vw, 5rem); line-height: .95; }
+.hero-title { font-size: clamp(2.4rem, 4.5vw, 4.25rem); line-height: .95; }
 .hero-title .mask { white-space: nowrap; }
 .mask { display: block; overflow: hidden; padding-bottom: .06em; }
 .hero-rise { display: inline-block; }
@@ -229,7 +229,8 @@ main section:not(#hero):not(#anatomy), .wordmark, footer { position: relative; z
 .anatomy-steps .num { font-family: var(--font-mono); font-size: .875rem; color: var(--color-mist); }
 .anatomy-steps h3 { margin-top: .15rem; font-size: 1.25rem; font-weight: 800; }
 .anatomy-steps li > p:last-child { margin-top: .35rem; font-size: .9375rem; color: var(--color-mist); }
-.js .anatomy-steps li:not(.is-active) { opacity: .6; }
+.js .anatomy-steps li:not(.is-active) { background: rgba(10,11,13,.62); }
+.js .anatomy-steps li:not(.is-active) h3 { color: var(--color-mist); }
 .js .anatomy-steps li:not(.is-active) > p:last-child { display: none; }
 .anatomy-steps li.is-active { border-color: color-mix(in oklab, var(--flood) 70%, white); background: rgba(10,11,13,.92); }
 @media (max-width: 1023px) {
