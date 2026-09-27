@@ -23,7 +23,7 @@ Notes:
 - Customer licence plates were blurred. EXIF metadata, which can include GPS location, was removed from every photo.
 - Vehicle brand names and badges appear only because they're on the photographed cars. That's not a claim of affiliation, and the Terms of Use say so.
 
-## 3D model: `assets/models/car-concept.glb`
+## 3D model: `src/models/car-concept.glb` (embedded as `assets/models/car-concept.glb.js`)
 
 | | |
 |---|---|
@@ -46,12 +46,13 @@ To rebuild the model from the original, see "Rebuilding the 3D model" in `README
 | Inter (variable) | [@fontsource-variable/inter](https://www.npmjs.com/package/@fontsource-variable/inter) | SIL Open Font License 1.1 |
 | JetBrains Mono (500) | [@fontsource/jetbrains-mono](https://www.npmjs.com/package/@fontsource/jetbrains-mono) | SIL Open Font License 1.1 |
 
-## Code libraries: `assets/vendor/`
+## Code libraries (bundled into `assets/js/car3d.js`)
 
 | Library | Version | Licence |
 |---|---|---|
-| three.js (core, GLTFLoader, OrbitControls, RoomEnvironment, BufferGeometryUtils, meshopt decoder) | 0.160.0 | MIT: see `assets/vendor/three/LICENSE`. The meshopt decoder is also MIT (© Arseny Kapoulkine). |
+| three.js (core, GLTFLoader, OrbitControls, RoomEnvironment, BufferGeometryUtils, meshopt decoder) | 0.160.0 | MIT: see `LICENSES/three.js.txt`. The meshopt decoder is also MIT (© Arseny Kapoulkine). |
 | Tailwind CSS (build-time only; not shipped as a runtime) | 4.x | MIT |
+| esbuild (build-time only) | 0.25 | MIT |
 
 ## Graphics made for this site
 

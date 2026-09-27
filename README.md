@@ -10,38 +10,44 @@ A static website with no server code, no cookies and no third-party requests.
 | `terms.html` | Terms of Use |
 | `accessibility.html` | Accessibility statement and feedback contact |
 
+## Viewing it
+
+Unzip the folder and **double-click `index.html`**. Everything works straight from disk, including the 3D car. Keep the `assets/` folder next to the HTML files.
+
 ## Hosting
 
 Upload the whole folder, including `assets/`, to any static host (Netlify, Cloudflare Pages, GitHub Pages, or ordinary shared hosting). There's no build step on the server.
 
 - **Serve it over HTTPS.** The Privacy Policy describes reasonable security practices, and a plain-HTTP site undermines them.
-- The pages must be served over `http(s)://`. Opening `index.html` directly from disk (`file://`) blocks the 3D module. To preview locally, run `npm run serve` and visit http://localhost:8080.
 - The Privacy Policy says the web host may keep standard server logs. If your host offers visitor analytics, leave it **off**, or update the Privacy and Cookie policies first.
+- Recommended security header, set on the host rather than in the HTML so that double-clicking still works:
+  `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'`
 
 ## Editing
 
 ```bash
 npm install          # once
-npm run build        # rebuilds assets/css/site.css and refreshes the CSP hash
+npm run build        # rebuilds CSS, the 3D bundle and the embedded model
 npm run watch:css    # rebuild CSS on every change while editing
 ```
 
 - Styles come from `src/input.css` (Tailwind CSS v4), built into `assets/css/site.css`. Tailwind isn't loaded from a CDN or run in the browser.
-- `index.html` has a Content-Security-Policy `<meta>` tag. It allows the inline import map through a SHA-256 hash. **If you edit the import map, run `npm run csp`**, or the 3D view stops loading.
-- The CSP blocks inline scripts and inline `style=""` attributes, so put new CSS in `src/input.css` and new JavaScript in `assets/js/`.
+- The 3D code comes from `src/car3d.js`, bundled with three.js into `assets/js/car3d.js` (`npm run build:js`).
+- The 3D model's source is `src/models/car-concept.glb`. `npm run build:model` wraps it into `assets/models/car-concept.glb.js`, which is what lets the site work from disk.
 - Opening hours appear in three places: the hours list in `index.html`, the "open now" logic in `assets/js/site.js` (`initHours`), and the JSON-LD block in the `<head>` of `index.html`.
 - The Google rating (4.5) and the reviews are copied from Google. Update them by hand; they don't sync.
 
 ### Files
 
 ```
-assets/js/site.js     page behaviour (menu, sliders, gallery, form, estimator logic)
-assets/js/car3d.js    three.js scenes: scroll story + estimator car (optional enhancement)
-assets/models/        compressed 3D car (see CREDITS.md)
-assets/img/shop/      the shop's own photos (plates blurred, metadata stripped)
-assets/fonts/         self-hosted fonts
-assets/vendor/three/  three.js r160 (MIT)
-scripts/              CSP hash helper, 3D model cleaning script
+assets/js/site.js              page behaviour (menu, sliders, gallery, form, estimator logic)
+assets/js/car3d.js             built 3D bundle (three.js + src/car3d.js), don't edit by hand
+assets/models/car-concept.glb.js   built model (base64), don't edit by hand
+assets/img/shop/               the shop's own photos (plates blurred, metadata stripped)
+assets/fonts/                  self-hosted fonts
+src/                           sources: Tailwind CSS, 3D script, 3D model
+scripts/                       model embedding and model cleaning scripts
+LICENSES/                      third-party licence texts
 ```
 
 ## How the pieces fit

@@ -20,6 +20,8 @@
     initEstimator();
     initPaint();
     initMagnetic();
+    // If the 3D script never finishes (blocked, very old browser), show the photo fallbacks.
+    setTimeout(() => { if (!doc.classList.contains('has-3d')) doc.classList.add('no-3d'); }, 30000);
   });
 
   /* ---------- mobile navigation ---------- */

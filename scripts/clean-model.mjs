@@ -1,4 +1,4 @@
-// Rebuilds assets/models/car-concept.glb from the original Khronos "Car Concept" sample (CC BY 4.0).
+// Rebuilds src/models/car-concept.glb from the original Khronos "Car Concept" sample (CC BY 4.0).
 //
 // The CC BY licence excludes the Khronos and 3D Commerce logos, so they are removed:
 //   texture 3  – Khronos logo (licence plate + emissive trim)  -> plain black
@@ -10,7 +10,7 @@
 //   curl -L -o CarConcept.glb https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb
 //   npx -y @gltf-transform/cli@4 --version   # make sure the CLI is available
 //   node scripts/clean-model.mjs CarConcept.glb car-clean.glb
-//   npx @gltf-transform/cli@4 optimize car-clean.glb assets/models/car-concept.glb \
+//   npx @gltf-transform/cli@4 optimize car-clean.glb src/models/car-concept.glb \
 //     --compress meshopt --texture-compress webp --texture-size 1024 \
 //     --simplify false --join false --flatten false --instance false --palette false
 // Afterwards, view the model and check that no logos remain.
