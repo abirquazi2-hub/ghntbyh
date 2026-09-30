@@ -1,0 +1,19 @@
+{
+  "name": "westdale-financial-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Westdale Financial Services website: static front end plus a small dependency-free form server",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node --env-file-if-exists=.env server/server.mjs",
+    "test": "node --test server/api.test.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "^5.2.0",
+    "@fontsource-variable/inter": "^5.2.0",
+    "esbuild": "^0.25.12",
+    "three": "0.160.0"
+  }
+}
