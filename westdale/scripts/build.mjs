@@ -14,3 +14,12 @@ await build({
   chunkNames: 'chunk-[hash]',
 });
 console.log('built');
+
+// Assemble the deployable static site in dist/ (used by Netlify; `npm start` serves from source).
+import { rm, mkdir, cp } from 'node:fs/promises';
+await rm('dist', { recursive: true, force: true });
+await mkdir('dist', { recursive: true });
+for (const f of ['index.html', 'privacy.html', 'terms.html', 'disclosures.html', '404.html', 'robots.txt', 'sitemap.xml', 'client-planner', 'assets']) {
+  await cp(f, `dist/${f}`, { recursive: true });
+}
+console.log('dist ready');

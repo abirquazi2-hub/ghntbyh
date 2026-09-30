@@ -38,3 +38,8 @@ The existing site (westdalefinancial.com) was **unreachable from the build envir
 
 ## Structure decisions
 Single-page home with anchored sections (services, Retirement Map, systems, process, Steve, resources, consultation), plus `/client-planner/`, privacy, terms and disclosures pages. Separate per-service URLs were not built; add them once real copy exists, for SEO.
+
+## Deploying on Netlify
+`netlify.toml` is included. In Netlify set **Base directory = `westdale`** (the repo root holds an unrelated site). `npm run build` writes the deployable site to `dist/` (publish directory) and the form API runs as Netlify Functions (`netlify/functions/`, sharing `server/handlers.mjs` with the Node server).
+
+Set these environment variables in Netlify (Site configuration → Environment variables): `CSRF_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, optionally `EMAIL_TO`, `ALLOWED_ORIGINS` (add your custom domain), `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`. Netlify's own site URL is allowed automatically. Note: function rate limiting is per warm instance, so it is best-effort; Turnstile is recommended on Netlify.
