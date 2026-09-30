@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "start": "node --env-file-if-exists=.env server/server.mjs",
+    "start": "npm run build && node --env-file-if-exists=.env server/server.mjs",
     "test": "node --test server/api.test.mjs"
   },
   "devDependencies": {

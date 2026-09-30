@@ -6,14 +6,13 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, createHandlers } from './handlers.mjs';
 
-const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url))); // run `npm run build` first
 const env = process.env, prod = env.NODE_ENV === 'production';
 const cfg = loadConfig(env);
 const port = Number(env.PORT) || 3000, trustProxy = env.TRUST_PROXY === '1';
 const api = createHandlers(cfg);
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.xml': 'application/xml', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json' };
-const PUBLIC = [/^\/index\.html$/, /^\/(privacy|terms|disclosures)\.html$/, /^\/client-planner\/index\.html$/, /^\/assets\/.+/, /^\/robots\.txt$/, /^\/sitemap\.xml$/, /^\/404\.html$/];
 
 function headers(extra = {}) {
   const ts = cfg.turnstileSiteKey ? ' https://challenges.cloudflare.com' : '';
@@ -27,15 +26,6 @@ function headers(extra = {}) {
 }
 const send = (res, code, body, extra = {}) => { res.writeHead(code, headers(extra)); res.end(body); };
 const json = (res, code, obj, extra = {}) => send(res, code, JSON.stringify(obj), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extra });
-const ipOf = (req) => (cfg.trustProxy && String(req.headers['x-forwarded-for'] || '').split(',').pop().trim()) || req.socket.remoteAddress || 'unknown';
-const cookies = (req) => Object.fromEntries(String(req.headers.cookie || '').split(';').map((c) => c.trim().split('=')).filter((p) => p[0]));
-const originOk = (req) => { const o = req.headers.origin; if (!o) return false; return cfg.origins.includes(o) || (!prod && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)); };
-
-async function readBody(req, max = 8192) {
-  let size = 0; const chunks = [];
-  for await (const c of req) { size += c.length; if (size > max) throw Object.assign(new Error('too large'), { code: 413 }); chunks.push(c); }
-  return Buffer.concat(chunks).toString('utf8');
-}
 
 async function readBody(req, max = 8192) {
   let size = 0; const chunks = [];
@@ -47,10 +37,10 @@ const relay = (res, r) => { res.writeHead(r.status, headers(r.headers)); res.end
 
 async function serveStatic(req, res, url) {
   let p = decodeURIComponent(url.pathname);
+  if (!p.endsWith('/') && !extname(p)) { res.writeHead(301, headers({ Location: p + '/' + url.search })); return res.end(); }
   if (p.endsWith('/')) p += 'index.html';
-  if (p === '/') p = '/index.html';
   p = normalize(p);
-  if (p.includes('\0') || !PUBLIC.some((r) => r.test(p))) return notFound(res);
+  if (p.includes('\0') || p.split(sep).some((seg) => seg.startsWith('.'))) return notFound(res);
   const file = join(ROOT, p);
   if (!file.startsWith(ROOT + sep)) return notFound(res);
   try {
@@ -77,4 +67,4 @@ export const server = http.createServer(async (req, res) => {
   } catch (e) { console.error('Unhandled error:', e.message); json(res, 500, { message: 'Something went wrong.' }); }
 });
 server.requestTimeout = 15000; server.headersTimeout = 10000;
-if (import.meta.url === `file://${process.argv[1]}`) server.listen(port, () => console.log(`Westdale site on http://localhost:${cfg.port}`));
+if (import.meta.url === `file://${process.argv[1]}`) server.listen(port, () => console.log(`Westdale site on http://localhost:${port}`));

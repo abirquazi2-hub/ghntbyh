@@ -2,32 +2,12 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const cad = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 
-/* ---------- Services tabs ---------- */
-function services() {
-  const tabs = $$('#svc [role=tab]');
-  const show = (tab, focus) => {
-    tabs.forEach((t) => { const on = t === tab; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $('#' + t.getAttribute('aria-controls')).hidden = !on; });
-    if (focus) tab.focus();
-  };
-  tabs.forEach((t, i) => {
-    t.addEventListener('click', () => show(t));
-    t.addEventListener('keydown', (e) => {
-      const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-      if (k) { e.preventDefault(); show(tabs[(i + k + tabs.length) % tabs.length], true); }
-      if (e.key === 'Home') { e.preventDefault(); show(tabs[0], true); }
-      if (e.key === 'End') { e.preventDefault(); show(tabs.at(-1), true); }
-    });
-  });
-  $$('[data-tab]').forEach((a) => a.addEventListener('click', () => show($('#' + a.dataset.tab))));
-}
-
 /* ---------- Planning systems accordion ---------- */
 function systems() {
   const toggle = (btn, open) => { btn.setAttribute('aria-expanded', open); $('#' + btn.getAttribute('aria-controls')).hidden = !open; };
   $$('#sys-list button').forEach((b) => b.addEventListener('click', () => toggle(b, b.getAttribute('aria-expanded') !== 'true')));
-  $$('[data-open]').forEach((a) => a.addEventListener('click', () => {
-    const b = $(`#sys-list button[aria-controls="${a.dataset.open}"]`); if (b) toggle(b, true);
-  }));
+  const fromHash = () => { const id = location.hash.slice(1); const b = id && $(`#sys-list button[aria-controls="${CSS.escape(id)}"]`); if (b) { toggle(b, true); b.closest('.sysi').scrollIntoView({ block: 'center' }); } };
+  fromHash(); addEventListener('hashchange', fromHash);
 }
 
 /* ---------- Your Retirement Map ---------- */
@@ -69,6 +49,12 @@ function retirementMap({ reduced }) {
   range.setAttribute('aria-valuetext', '');
   range.addEventListener('input', () => range.setAttribute('aria-valuetext', `${STAGES[+range.value].n}, illustrative age ${STAGES[+range.value].age}`));
   render();
+}
+
+function stageCards() {
+  const host = $('#stage-cards'); if (!host) return;
+  host.innerHTML = STAGES.map((s, i) => `<article class="stage reveal"><span>0${i + 1}</span><h3>${s.n}</h3><p>${s.body}</p><ul>${s.q.map((q) => `<li>${q}</li>`).join('')}</ul></article>`).join('');
+  host.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
 }
 
 /* ---------- Illustrative growth chart ---------- */
@@ -135,9 +121,8 @@ function buildPlan() {
     const p = PLANS[b.dataset.stage];
     $('#bp-h').textContent = p.h;
     const ol = $('#bp-list'); ol.innerHTML = ''; p.steps.forEach((s) => { const li = document.createElement('li'); li.textContent = s; ol.append(li); });
-    $('#bp-cta').dataset.topic = p.topic; out.hidden = false;
-    $('#bp-cta').onclick = () => { $('#f-topic').value = p.topic; };
+    $('#bp-cta').href = '/book-a-consultation/?topic=' + encodeURIComponent(p.topic); out.hidden = false;
   }));
 }
 
-export function initTools(opts) { services(); systems(); retirementMap(opts); illustrator(opts); buildPlan(); }
+export function initTools(opts) { systems(); stageCards(); retirementMap(opts); illustrator(opts); buildPlan(); }

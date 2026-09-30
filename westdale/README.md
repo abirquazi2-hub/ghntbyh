@@ -1,12 +1,12 @@
 # Westdale Financial Services: website rebuild
 
-Static front end (HTML/CSS/JS, self-hosted fonts, lazy-loaded three.js hero) plus a small **dependency-free Node server** (`server/`) that serves the site with security headers and handles the consultation form.
+Multi-page static site (generated HTML, CSS/JS, self-hosted fonts, lazy-loaded three.js 3D scenes) plus a small **dependency-free Node server** (`server/`) that serves the site with security headers and handles the consultation form.
 
 ```bash
 npm install
-npm run build     # bundles src/ -> assets/js (three.js is a lazy chunk)
+npm run build     # generates pages + bundles JS into dist/
 npm test          # validation, rate limiter, CSRF tests
-npm start         # http://localhost:3000 (reads .env if present)
+npm start         # builds, then serves dist/ at http://localhost:3000 (reads .env if present)
 ```
 
 ## What works now vs. what you must configure
@@ -36,8 +36,10 @@ The existing site (westdalefinancial.com) was **unreachable from the build envir
 7. The photo (`assets/img/steve-fricker.png`) was supplied with the brief at 312x437; a higher-resolution original will look sharper.
 8. The illustration disclaimer wording should be approved by compliance.
 
-## Structure decisions
-Single-page home with anchored sections (services, Retirement Map, systems, process, Steve, resources, consultation), plus `/client-planner/`, privacy, terms and disclosures pages. Separate per-service URLs were not built; add them once real copy exists, for SEO.
+## Structure
+A real multi-page site generated at build time from `src/site/` (`content.mjs` = all copy, `layout.mjs` = header/footer, `pages.mjs` = pages). `npm run build` writes everything to `dist/`.
+
+Pages: Home, Services + six service pages, Your Retirement Map, Planning Systems, Our Process, About Steve, Resources, Growth Illustration, Build Your Retirement Plan, Client Planner, Book a Consultation, Contact, Privacy, Terms, Disclosures, 404. Edit copy in `content.mjs` / `pages.mjs`, then rebuild. Page-to-page navigation uses View Transitions where the browser supports them.
 
 ## Deploying on Netlify
 `netlify.toml` is included. In Netlify set **Base directory = `westdale`** (the repo root holds an unrelated site). `npm run build` writes the deployable site to `dist/` (publish directory) and the form API runs as Netlify Functions (`netlify/functions/`, sharing `server/handlers.mjs` with the Node server).

@@ -19,7 +19,9 @@ else setTimeout(hideLoader, 1500);
 // Nav
 const nav = $('#nav');
 const burger = $('#burger'), drawer = $('#drawer');
+const bar = $('#progress');
 const onScroll = () => {
+  if (bar) bar.style.transform = `scaleX(${Math.min(1, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight))})`;
   nav.classList.toggle('scrolled', scrollY > 30);
   $('.mobile-cta')?.classList.toggle('show', scrollY > innerHeight * 0.7 && !document.querySelector('#consultation')?.matches(':hover') && !inView($('#consultation')));
 };
@@ -57,6 +59,7 @@ if (!reduced && matchMedia('(hover:hover) and (pointer:fine)').matches) {
     b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.12}px,${(e.clientY - r.top - r.height / 2) * 0.2 - 2}px)`; });
     b.addEventListener('pointerleave', () => { b.style.transform = ''; });
   });
+  $$('.scard').forEach((c) => c.addEventListener('pointermove', (e) => { const r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }));
   $$('.tilt').forEach((c) => {
     const max = c.classList.contains('tilt--photo') ? 8 : 3;
     c.addEventListener('pointermove', (e) => { const r = c.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; c.style.transform = `rotateY(${x * max}deg) rotateX(${-y * max}deg)`; });
@@ -65,15 +68,14 @@ if (!reduced && matchMedia('(hover:hover) and (pointer:fine)').matches) {
 }
 
 // Topic links prefill the consultation form
-$$('[data-topic]').forEach((a) => a.addEventListener('click', () => { const v = a.dataset.topic; const sel = $('#f-topic'); if (v && sel) sel.value = v; }));
+try { const t = new URLSearchParams(location.search).get('topic'); const sel = $('#f-topic'); if (t && sel && [...sel.options].some((o) => o.value === t)) sel.value = t; } catch (e) {}
 
 // 3D hero (lazy; falls back to CSS backdrop without WebGL)
 const canvas = $('#hero-canvas');
 try {
   const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
-  if (gl && canvas) import('./hero3d.js').then((m) => m.startHero(canvas, { reduced })).catch(() => {});
+  if (gl && canvas) import('./hero3d.js').then((m) => m.startHero(canvas, { reduced, scene: canvas.dataset.scene })).catch(() => {});
 } catch (e) {}
 
-$('#yr').textContent = new Date().getFullYear();
 initTools({ reduced });
 initForm();
